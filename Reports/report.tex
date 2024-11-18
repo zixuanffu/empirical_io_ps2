@@ -1,0 +1,123 @@
+\documentclass[12pt]{article}[margin=1in]
+\usepackage{fullpage,graphicx,psfrag,amsmath,amsfonts,verbatim}
+\usepackage{multicol,multirow}
+\usepackage[small,bf]{caption}
+\usepackage{amsthm}
+\usepackage{hyperref}
+\usepackage{bbm} % for the indicator function to look good
+\usepackage{color}
+\usepackage{mathtools}
+\usepackage{fancyhdr} % for the header
+\usepackage{booktabs} % for regression table display (toprule, midrule, bottomrule)
+\usepackage{adjustbox} % for regression table display
+\usepackage{threeparttable} % to use table notes
+\usepackage{natbib} % for bibliography
+\input newcommand.tex
+\bibliographystyle{apalike}
+\setlength{\parindent}{0pt} % remove the automatic indentation
+
+% Settings for page number in the footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\title{\textbf{Dynamic Discrete Choice} \\
+\vspace{.3cm}
+\large Problem Set 2 \\
+Empirical Industrial Organization}
+\author{Zixuan, Anoosheh, Shuo}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\setcounter{page}{1}
+
+The value function is given by
+\begin{equation*}
+    \begin{split}
+        V(i,c,p,\epsilon_t) & = \max_{x \in \{0,1\}} \left\{ u(i,c,p,x) + \epsilon(x)+ \beta \E[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \right\}                                                        \\
+                            & = \max_{x \in \{0,1\}} \left\{ u(i,c,p,x) + \epsilon(x)+ \beta \sum_{i',c',p'}\E_{\epsilon_{t+1}}[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \Pr(i', c',p'|i,c,p,x) \right\} \\
+    \end{split}
+\end{equation*}
+The utility function $u(i,c,p,x)$ is given by
+\begin{equation*}
+    u(i,c,p,x) = -\lambda \1(c>0)\1(i=0) + \alpha c -xp
+\end{equation*}
+In terms of the variables (data that we have),
+\begin{itemize}
+    \item $i$ is the inventory level.
+    \item $c$ is the consumer's purchase decision (firm's sales).
+    \item $p$ is the price.
+    \item $x$ is the firm's purchase decision.
+    \item $\epsilon(x)$ is choice specific random utility shock
+\end{itemize}
+In terms of the parameters (to be estimated, but actually given in this problem),
+\begin{itemize}
+    \item $\lambda=-3$ is the penalty of stocking out (the consumer wants to buy, but the firm does not have the product).
+    \item $\alpha=2$ is the marginal utility of selling the product.
+    \item $\beta=0.99$ is the discount factor.
+\end{itemize}
+
+The variables follow a certain process. Here, we assume that the variables
+follow discrete Markov process. The variables in the next period:
+\begin{itemize}
+    \item Inventory $i$ will be the current level + firm's purchase - sales: \begin{equation*}
+              i'=\min \set{\bar{i}=4,i+x-c}
+          \end{equation*}
+    \item Consumer's purchase decision $c$ (firm's sales):\begin{equation*}
+              c'=\begin{cases}
+                  0 & \text{with probability } \gamma = 0.5   \\
+                  1 & \text{with probability } 1-\gamma = 0.5
+              \end{cases}
+          \end{equation*}
+    \item Price $p$ with two discrete states $p_s=0.5$ and $p_r=2$: \begin{equation*}
+              \Pi=\begin{pmatrix}
+                  0.75 & 0.25 \\
+                  0.95 & 0.05
+              \end{pmatrix}
+          \end{equation*}
+\end{itemize}
+
+\section{Question 1: Transition Probability}
+Since we have discrete state variables $(i,c,p)$, the transition probability
+can be expressed in matrix form. Moreover, the transition of $c$ and $p$ are
+independent of each other, $i$ and $x$. We only specify the transition of $i$
+here which takes values from 0 to 4. \\ When $x = 0$,
+\begin{equation*}
+    \begin{pmatrix}
+        1   & 0   & 0   & 0   & 0   \\
+        0.5 & 0.5 & 0   & 0   & 0   \\
+        0   & 0.5 & 0.5 & 0   & 0   \\
+        0   & 0   & 0.5 & 0.5 & 0   \\
+        0   & 0   & 0   & 0.5 & 0.5
+    \end{pmatrix}
+\end{equation*}
+When $x = 1$,
+\begin{equation*}
+    \begin{pmatrix}
+        0.5 & 0.5 & 0   & 0   & 0   \\
+        0   & 0.5 & 0.5 & 0   & 0   \\
+        0   & 0   & 0.5 & 0.5 & 0   \\
+        0   & 0   & 0   & 0.5 & 0.5 \\
+        0   & 0   & 0   & 0   & 1
+    \end{pmatrix}
+\end{equation*}
+Then the transition probability matrix for state $s$ is given by the Kronecker product of the transition matrices of $i$, $c$, and $p$, which is $P_s(x) = P_i(x) \otimes P_c \otimes P_p$.
+\section{Question 2: Expected Value Function}
+\subsection{Expected/Intermediate Value Function $\bar{V}(i,c,p)$}
+We denote $\bar{V}(i,c,p) = \E_{\epsilon}[V(i,c,p,\epsilon)]$ as the expected value function (I used to call it intermediate value function).
+
+\begin{equation*}
+    \bar{V}(i,c,p) =\sum_{x \in \{0,1\}} P(x|i,c,p) \left\{ u(i,c,p,x) + \E[\epsilon(x)|i,c,p,x] + \beta \sum \bar{V}(i',c',p') \Pr(i',c',p'|i,c,p,x) \right\}
+\end{equation*}
+\subsection{Numerical solution of $\bar{V}(i,c,p)$}
+
+\section{Question 3: Simulation}
+\section{Question 4: Estimate $\bar{V}(i,c,p)$ using CCP method}
+\pagebreak
+\newpage
+
+\end{document}
