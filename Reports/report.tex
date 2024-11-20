@@ -138,9 +138,9 @@ Let us denote ${v}(i,c,p,x) = u(i,c,p,x) +  \beta \sum \bar{V}(i',c',p') \Pr(i',
 Or should I write it as
 \begin{equation}
     \begin{split}
-        \bar{V}(s) & =  \gamma + \ln (1-P(x=1|s))                                                                                                      \\
-                   & =  \gamma + \ln (1+\exp({v}(i,c,p,1)-{v}(i,c,p,0)))                                                                               \\
-                   & =  \gamma + \ln\pa{1+ \exp(u(s,1) - u(s,0) +  \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,1) - \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0))}
+        \bar{V}(s) & =  \gamma + v(s,0)+\ln (1-P(x=1|s))                                                                                                                                              \\
+                   & =  \gamma + v(s,0)+\ln (1+\exp({v}(i,c,p,1)-{v}(i,c,p,0)))                                                                                                                       \\
+                   & =  \gamma + u(s,0)+\beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0)+\ln\pa{1+ \exp(u(s,1) - u(s,0) +  \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,1) - \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0))}
     \end{split}
 \end{equation}
 \subsection{Numerical solution of $\bar{V}(i,c,p)$}
@@ -156,10 +156,11 @@ Then we have
     \bar{V}= \gamma + \ln\pa{\exp\pa{u_0 + \beta M_0 \bar{V}} + \exp\pa{u_1 + \beta M_1 \bar{V}}}
 \end{equation}
 The goal is to numerically solve for this equation \ref{eq:exp_v_binary_matrix}
-for $\bar{V}$. The result is shown in the table below.
+for $\bar{V}$. The result is shown in table \ref{tab:V_state}.
 \begin{table} \fontsize{10pt}{12pt}\selectfont
     \centering
     \input{../Results/Tables/V_state.tex}
+    \label{tab:V_state}
 \end{table}
 \section{Question 3: Simulation}
 \begin{enumerate}
@@ -172,13 +173,42 @@ for $\bar{V}$. The result is shown in the table below.
     \item Given $x^*$, simulate a new state $s'$ from the transition matrix $M_{x^*}$.
     \item Repeat step 2 and 3 for $T$ periods.
 \end{enumerate}
-
+The simulation results are shown in the table \ref{tab:sim_des}.
+\begin{table} \fontsize{10pt}{12pt}\selectfont
+    \centering
+    \input{../Results/Tables/simulation_des.tex}
+    \label{tab:sim_des}
+\end{table}
 \section{Question 4: Estimate $\bar{V}(i,c,p)$ using CCP method}
 In this question we focus on the first line of equation \ref{eq:exp_v_binary} to estimate the $\bar{V}(i,c,p)$. We first estimate the choice probability $\hat{P}(x|s)$ and then recover $\hat{\bar{V}}(s)$. That is
 \begin{equation*}
-    \hat{\bar{V}}(s) =  \gamma + \ln (1-\hat{P}(x=1|s))
+    \hat{\bar{V}}(s) =  \gamma + u(s,0)+\beta \sum_{s'} \hat{\bar{V}}(s') \hat{\Pr}(s'|s,0)+\ln (1-\hat{P}(x=1|s))
 \end{equation*}
+The estimated transition probability matrix $M_0$ and $M_1$, as well as the conditional choice probability are presented in the appendix.
+Table \ref{tab:V_both} shows the estimated $\bar{V}(i,c,p)$ using the CCP method against the full solution method in the previous section.
+\begin{table} \fontsize{10pt}{12pt}\selectfont
+    \centering
+    \input{../Results/Tables/V_both.tex}
+    \label{tab:V_both}
+\end{table}
+
 \pagebreak
 \newpage
+\appendix
+\section{Transition Probability Matrix}
+The number in parentheses is the estimated transition probability.
+\begin{table}
+    \centering
+    \input{../Results/Tables/M_0_both.tex}
+    \caption{Transition Probability Matrix $M_0$}
+    \label{tab:M_0}
+\end{table}
+\begin{table}
+    \centering
+    \input{../Results/Tables/M_1_both.tex}
+    \caption{Transition Probability Matrix $M_1$}
+    \label{tab:M_1}
+\end{table}
+\section{Conditional Choice Probability}
 
 \end{document}
