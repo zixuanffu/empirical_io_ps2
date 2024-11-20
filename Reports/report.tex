@@ -56,7 +56,7 @@ In terms of the variables (data that we have),
 \end{itemize}
 In terms of the parameters (to be estimated, but actually given in this problem),
 \begin{itemize}
-    \item $\lambda=-3$ is the penalty of stocking out (the consumer wants to buy, but the firm does not have the product).
+    \item $\lambda=3$ is the penalty of stocking out (the consumer wants to buy, but the firm does not have the product).
     \item $\alpha=2$ is the marginal utility of selling the product.
     \item $\beta=0.99$ is the discount factor.
 \end{itemize}
@@ -86,7 +86,7 @@ Since we have discrete state variables $(i,c,p)$, the transition probability
 can be expressed in matrix form. Moreover, the transition of $c$ and $p$ are
 independent of each other, $i$ and $x$. We only specify the transition of $i$
 here which takes values from 0 to 4. \\ When $x = 0$,
-\begin{equation*}
+\begin{equation}\label{eq:trans0}
     \begin{pmatrix}
         1   & 0   & 0   & 0   & 0   \\
         0.5 & 0.5 & 0   & 0   & 0   \\
@@ -94,9 +94,9 @@ here which takes values from 0 to 4. \\ When $x = 0$,
         0   & 0   & 0.5 & 0.5 & 0   \\
         0   & 0   & 0   & 0.5 & 0.5
     \end{pmatrix}
-\end{equation*}
+\end{equation}
 When $x = 1$,
-\begin{equation*}
+\begin{equation}\label{eq:trans1}
     \begin{pmatrix}
         0.5 & 0.5 & 0   & 0   & 0   \\
         0   & 0.5 & 0.5 & 0   & 0   \\
@@ -104,19 +104,80 @@ When $x = 1$,
         0   & 0   & 0   & 0.5 & 0.5 \\
         0   & 0   & 0   & 0   & 1
     \end{pmatrix}
-\end{equation*}
+\end{equation}
 Then the transition probability matrix for state $s$ is given by the Kronecker product of the transition matrices of $i$, $c$, and $p$, which is $P_s(x) = P_i(x) \otimes P_c \otimes P_p$.
 \section{Question 2: Expected Value Function}
 \subsection{Expected/Intermediate Value Function $\bar{V}(i,c,p)$}
 We denote $\bar{V}(i,c,p) = \E_{\epsilon}[V(i,c,p,\epsilon)]$ as the expected value function (I used to call it intermediate value function).
 
-\begin{equation*}
+\begin{equation}\label{eq:exp_v}
     \bar{V}(i,c,p) =\sum_{x \in \{0,1\}} P(x|i,c,p) \left\{ u(i,c,p,x) + \E[\epsilon(x)|i,c,p,x] + \beta \sum \bar{V}(i',c',p') \Pr(i',c',p'|i,c,p,x) \right\}
-\end{equation*}
-\subsection{Numerical solution of $\bar{V}(i,c,p)$}
+\end{equation}
+Note that the terms that are known are
+\begin{itemize}
+    \item $u(i,c,p,x)$ is the \textbf{utility function} which is explicitly given.
+    \item $\Pr(i',c',p'|i,c,p,x)$ is the \textbf{transition probability} of $i,c,p$ given $i,c,p,x$ (see equation \ref{eq:trans0} and \ref{eq:trans1}).
+\end{itemize}
+The unknown terms are
+\begin{itemize}
+    \item $P(x|i,c,p)$ is the \textbf{choice probability}.
+    \item $E(\epsilon(x)|i,c,p,x)$ is the expectation of $\epsilon(x)$ conditional on $i,c,p$ and $x$ being the optimal choice.
+    \item $\bar{V}(i,c,p)$ is the \textbf{expected value function}.
 
+\end{itemize}
+In the binary case with $\epsilon \sim T1EV$, instead of solving $V(s)$ as a function of $P(x|s)$ from the equation \ref{eq:exp_v}, we now have a simplified expression for $\bar{V}(s)$. \\
+Let us denote ${v}(i,c,p,x) = u(i,c,p,x) +  \beta \sum \bar{V}(i',c',p') \Pr(i',c',p'|i,c,p,x)$. Then we have
+\begin{equation}\label{eq:exp_v_binary}
+    \begin{split}
+        \bar{V}(s) & =  \gamma + \ln (1-P(x=1|s))                                                                                                        \\
+                   & =  \gamma + \ln (\exp({v}(i,c,p,0)) + \exp({v}(i,c,p,1)))                                                                           \\
+                   & =  \gamma + \ln\pa{\exp\pa{u(s,0) +  \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0)} + \exp\pa{u(s,1) +  \beta \sum_{s'} \bar{V}(s') \Pr(s
+                '|s,1)}}
+    \end{split}
+\end{equation}
+Or should I write it as
+\begin{equation}
+    \begin{split}
+        \bar{V}(s) & =  \gamma + \ln (1-P(x=1|s))                                                                                                      \\
+                   & =  \gamma + \ln (1+\exp({v}(i,c,p,1)-{v}(i,c,p,0)))                                                                               \\
+                   & =  \gamma + \ln\pa{1+ \exp(u(s,1) - u(s,0) +  \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,1) - \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0))}
+    \end{split}
+\end{equation}
+\subsection{Numerical solution of $\bar{V}(i,c,p)$}
+We use the equation \ref{eq:exp_v_binary} to solve for $\bar{V}(i,c,p)$ numerically.  I want rewrite the equations for all $s$ in matrix form. Since we have a total of $20=5\times 2\times 2$ discrete state $s$, denote
+\begin{itemize}
+    \item $\bar{V}$ as a vector of length 20.
+    \item $u_0$ as a vector of length 20 where the $i$-th element is $u(s,0)$.
+    \item $M_0$ as a matrix of size $20 \times 20$ where the $i$-th row is the vector of $\Pr(s'|s,0)$
+\end{itemize}
+Then we have
+
+\begin{equation}\label{eq:exp_v_binary_matrix}
+    \bar{V}= \gamma + \ln\pa{\exp\pa{u_0 + \beta M_0 \bar{V}} + \exp\pa{u_1 + \beta M_1 \bar{V}}}
+\end{equation}
+The goal is to numerically solve for this equation \ref{eq:exp_v_binary_matrix}
+for $\bar{V}$. The result is shown in the table below.
+\begin{table} \fontsize{10pt}{12pt}\selectfont
+    \centering
+    \input{../Results/Tables/V_state.tex}
+\end{table}
 \section{Question 3: Simulation}
+\begin{enumerate}
+    \item At period $t=0$, simulate state $s$ as well as the shock $\epsilon \sim T1EV$.
+    \item Find the optimal choice $x$ given current $s$ and $\epsilon$ by the following \begin{equation*}
+              x^* = \argmax_{x
+                  \in \{0,1\}}  \left\{ u(s,x) + \epsilon+ \beta
+              \sum_{s'}\bar{V}(s')\Pr(s'|s,x) \right\}
+          \end{equation*}
+    \item Given $x^*$, simulate a new state $s'$ from the transition matrix $M_{x^*}$.
+    \item Repeat step 2 and 3 for $T$ periods.
+\end{enumerate}
+
 \section{Question 4: Estimate $\bar{V}(i,c,p)$ using CCP method}
+In this question we focus on the first line of equation \ref{eq:exp_v_binary} to estimate the $\bar{V}(i,c,p)$. We first estimate the choice probability $\hat{P}(x|s)$ and then recover $\hat{\bar{V}}(s)$. That is
+\begin{equation*}
+    \hat{\bar{V}}(s) =  \gamma + \ln (1-\hat{P}(x=1|s))
+\end{equation*}
 \pagebreak
 \newpage
 
