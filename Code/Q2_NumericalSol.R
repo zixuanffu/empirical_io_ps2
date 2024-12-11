@@ -33,10 +33,11 @@ u_0 <- u(s, 0)
 u_1 <- u(s, 1)
 
 # expected value function
-exp_v <- function(V, u_0, u_1, M_0, M_1, beta = 0.99, gamma = 0.5772157) {
-    res <- V - (gamma + u_0 + beta * M_0 %*% V + log(1 + exp((u_1 + beta * M_1 %*% V) - (u_0 + beta * M_0 %*% V))))
-    return(res)
-}
+
+# exp_v <- function(V, u_0, u_1, M_0, M_1, beta = 0.99, gamma = 0.5772157) {
+#     res <- V - (gamma + u_0 + beta * M_0 %*% V + log(1 + exp((u_1 + beta * M_1 %*% V) - (u_0 + beta * M_0 %*% V))))
+#     return(res)
+# }
 
 exp_v <- function(V, u_0, u_1, M_0, M_1, beta = 0.99, gamma = 0.5772157) {
     res <- V - (gamma + log(exp(u_1 + beta * M_1 %*% V) + exp(u_0 + beta * M_0 %*% V)))

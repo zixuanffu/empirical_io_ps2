@@ -38,8 +38,9 @@ Empirical Industrial Organization}
 The value function is given by
 \begin{equation*}
     \begin{split}
-        V(i,c,p,\epsilon_t) & = \max_{x \in \{0,1\}} \left\{ u(i,c,p,x) + \epsilon(x)+ \beta \E[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \right\}                                                        \\
-                            & = \max_{x \in \{0,1\}} \left\{ u(i,c,p,x) + \epsilon(x)+ \beta \sum_{i',c',p'}\E_{\epsilon_{t+1}}[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \Pr(i', c',p'|i,c,p,x) \right\} \\
+        V(i,c,p,\epsilon_t) & = \max_{x \in \{0,1\}} \left\{ u(i,c,p,x) + \epsilon(x)+ \beta \E[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \right\}     \\
+                            & = \max_{x \in \{0,1\}} \big\{ u(i,c,p,x) + \epsilon(x)                                                             \\
+                            & \quad + \beta \sum_{i',c',p'}\E_{\epsilon_{t+1}}[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \Pr(i', c',p'|i,c,p,x) \big\}
     \end{split}
 \end{equation*}
 The utility function $u(i,c,p,x)$ is given by
@@ -108,64 +109,44 @@ When $x = 1$,
 Then the transition probability matrix for state $s$ is given by the Kronecker product of the transition matrices of $i$, $c$, and $p$, which is $P_s(x) = P_i(x) \otimes P_c \otimes P_p$.
 \section{Question 2: Expected Value Function}
 \subsection{Expected/Intermediate Value Function $\bar{V}(i,c,p)$}
-We denote $\bar{V}(i,c,p) = \E_{\epsilon}[V(i,c,p,\epsilon)]$ as the expected value function (I used to call it intermediate value function).
-
+We denote $\bar{V}(s) = \E_{\epsilon}[V(s,\epsilon)]$ as the expected value function (I used to call it intermediate value function).
 \begin{equation}\label{eq:exp_v}
-    \bar{V}(i,c,p) =\sum_{x \in \{0,1\}} P(x|i,c,p) \left\{ u(i,c,p,x) + \E[\epsilon(x)|i,c,p,x] + \beta \sum \bar{V}(i',c',p') \Pr(i',c',p'|i,c,p,x) \right\}
+    \begin{split}
+        \bar{V}(s) & =\int \max_{x \in \{0,1\}} \big\{ u(s,x) + \epsilon(x)+ \beta \sum_{s'}\E_{\epsilon_{t+1}}[V(s',\epsilon_{t+1})|s,x] \Pr(s'|s,x)\big\}  f(\epsilon) d\epsilon \\
+                   & =\int \max_{x \in \{0,1\}} \big\{ u(s,x) + \epsilon(x)+ \beta \sum_{s'}\bar{V}(s') \Pr(s'|s,x)\big\}  f(\epsilon) d\epsilon
+    \end{split}
 \end{equation}
-Note that the terms that are known are
-\begin{itemize}
-    \item $u(i,c,p,x)$ is the \textbf{utility function} which is explicitly given.
-    \item $\Pr(i',c',p'|i,c,p,x)$ is the \textbf{transition probability} of $i,c,p$ given $i,c,p,x$ (see equation \ref{eq:trans0} and \ref{eq:trans1}).
-\end{itemize}
-The unknown terms are
-\begin{itemize}
-    \item $P(x|i,c,p)$ is the \textbf{choice probability}.
-    \item $E(\epsilon(x)|i,c,p,x)$ is the expectation of $\epsilon(x)$ conditional on $i,c,p$ and $x$ being the optimal choice.
-    \item $\bar{V}(i,c,p)$ is the \textbf{expected value function}.
+Since $\epsilon$ is assumed to follow Type 1 Extreme Value distribution (which allows the integral over the maximum to collapse into a log-sum-exp form\footnote{I am not sure when and whether to include the Euler-Mascheroni constant $\gamma$}), we have
+\begin{equation} \label{eq:exp_v_bin}
+    \bar{V}(s) = \gamma+\ln\left(\sum_{x \in \{0,1\}} \exp\left\{ u(s,x) + \beta \sum_{s'}\bar{V}(s') \Pr(s'|s,x)\right\}\right)
+\end{equation}
 
-\end{itemize}
-In the binary case with $\epsilon \sim T1EV$, instead of solving $V(s)$ as a function of $P(x|s)$ from the equation \ref{eq:exp_v}, we now have a simplified expression for $\bar{V}(s)$. \\
-Let us denote ${v}(i,c,p,x) = u(i,c,p,x) +  \beta \sum \bar{V}(i',c',p') \Pr(i',c',p'|i,c,p,x)$. Then we have
-\begin{equation}\label{eq:exp_v_binary}
-    \begin{split}
-        \bar{V}(s) & =  \gamma + \ln (1-P(x=1|s))                                                                                                        \\
-                   & =  \gamma + \ln (\exp({v}(i,c,p,0)) + \exp({v}(i,c,p,1)))                                                                           \\
-                   & =  \gamma + \ln\pa{\exp\pa{u(s,0) +  \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0)} + \exp\pa{u(s,1) +  \beta \sum_{s'} \bar{V}(s') \Pr(s
-                '|s,1)}}
-    \end{split}
-\end{equation}
-Or should I write it as
-\begin{equation}
-    \begin{split}
-        \bar{V}(s) & =  \gamma + v(s,0)+\ln (1-P(x=1|s))                                                                                                                                              \\
-                   & =  \gamma + v(s,0)+\ln (1+\exp({v}(i,c,p,1)-{v}(i,c,p,0)))                                                                                                                       \\
-                   & =  \gamma + u(s,0)+\beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0)+\ln\pa{1+ \exp(u(s,1) - u(s,0) +  \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,1) - \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0))}
-    \end{split}
-\end{equation}
 \subsection{Numerical solution of $\bar{V}(i,c,p)$}
-We use the equation \ref{eq:exp_v_binary} to solve for $\bar{V}(i,c,p)$ numerically.  I want rewrite the equations for all $s$ in matrix form. Since we have a total of $20=5\times 2\times 2$ discrete state $s$, denote
+We use the equation \ref{eq:exp_v_bin} to solve for $\bar{V}(i,c,p)$.  I rewrite the equations for all $s$ in matrix form. Since we have a total of $20=5\times 2\times 2$ discrete state $s$, denote
 \begin{itemize}
     \item $\bar{V}$ as a vector of length 20.
     \item $u_0$ as a vector of length 20 where the $i$-th element is $u(s,0)$.
     \item $M_0$ as a matrix of size $20 \times 20$ where the $i$-th row is the vector of $\Pr(s'|s,0)$
 \end{itemize}
 Then we have
-
-\begin{equation}\label{eq:exp_v_binary_matrix}
+\begin{equation}\label{eq:exp_v_bin_matrix}
     \bar{V}= \gamma + \ln\pa{\exp\pa{u_0 + \beta M_0 \bar{V}} + \exp\pa{u_1 + \beta M_1 \bar{V}}}
 \end{equation}
-The goal is to numerically solve for this equation \ref{eq:exp_v_binary_matrix}
-for $\bar{V}$. The result is shown in table \ref{tab:V_state}.
-\begin{table} \fontsize{10pt}{12pt}\selectfont
+The goal is to numerically solve for equation \ref{eq:exp_v_bin_matrix} for $\bar{V}$. The result is shown in table \ref{tab:V_ss}.
+\newpage
+\begin{table}
     \centering
     \input{../Results/Tables/V_state.tex}
-    \label{tab:V_state}
+    \caption{Expected value function $\bar{V}(i,c,p)$ for each state $s=(i,c,p)$}
+    \label{tab:V_ss}
 \end{table}
+\newpage
 \section{Question 3: Simulation}
 \begin{enumerate}
-    \item At period $t=0$, simulate state $s$ as well as the shock $\epsilon \sim T1EV$.
-    \item Find the optimal choice $x$ given current $s$ and $\epsilon$ by the following \begin{equation*}
+    \item At period $t=0$, simulate state $s$ as well as the shock $\epsilon \sim
+              \text{EV}(1)$.
+    \item Find the optimal choice $x$ given current $s$ and $\epsilon$ by the following
+          \begin{equation*}
               x^* = \argmax_{x
                   \in \{0,1\}}  \left\{ u(s,x) + \epsilon+ \beta
               \sum_{s'}\bar{V}(s')\Pr(s'|s,x) \right\}
@@ -173,42 +154,63 @@ for $\bar{V}$. The result is shown in table \ref{tab:V_state}.
     \item Given $x^*$, simulate a new state $s'$ from the transition matrix $M_{x^*}$.
     \item Repeat step 2 and 3 for $T$ periods.
 \end{enumerate}
-The simulation results are shown in the table \ref{tab:sim_des}.
-\begin{table} \fontsize{10pt}{12pt}\selectfont
+The  summary statistics are shown in the table \ref{tab:sim_des}.
+\begin{enumerate}
+    \item frequency of positive purchases,
+    \item probability of purchasing on sale,
+    \item average duration between sales,
+    \item average duration between purchases
+\end{enumerate}
+\begin{table}
     \centering
     \input{../Results/Tables/simulation_des.tex}
+    \caption{Summary statistics of the simulation}
     \label{tab:sim_des}
 \end{table}
+
 \section{Question 4: Estimate $\bar{V}(i,c,p)$ using CCP method}
-In this question we focus on the first line of equation \ref{eq:exp_v_binary} to estimate the $\bar{V}(i,c,p)$. We first estimate the choice probability $\hat{P}(x|s)$ and then recover $\hat{\bar{V}}(s)$. That is
-\begin{equation*}
-    \hat{\bar{V}}(s) =  \gamma + u(s,0)+\beta \sum_{s'} \hat{\bar{V}}(s') \hat{\Pr}(s'|s,0)+\ln (1-\hat{P}(x=1|s))
-\end{equation*}
-The estimated transition probability matrix $M_0$ and $M_1$, as well as the conditional choice probability are presented in the appendix.
-Table \ref{tab:V_both} shows the estimated $\bar{V}(i,c,p)$ using the CCP method against the full solution method in the previous section.
-\begin{table} \fontsize{10pt}{12pt}\selectfont
+In this question, we \textbf{rewrite} equation \ref{eq:exp_v} in terms of the choice probability $\Pr(x|s)$.
+\begin{equation}
+    \begin{split}
+        \bar{V}(s) & =\sum_{x \in \{0,1\}} \Pr(x|s) \big\{ u(s,x) + \E[\epsilon(x)|s,x] \\
+                   & \quad + \beta \sum \bar{V}(s') \Pr(s'|s,x) \big\}
+    \end{split}
+\end{equation}
+Note that the terms that are known are
+\begin{itemize}
+    \item $u(s,x)$ is the \textbf{utility function} which is explicitly given.
+    \item $\Pr(s'|s,x)$ is the \textbf{transition probability} of $s$ given $s,x$ (see equation \ref{eq:trans0} and \ref{eq:trans1}).
+\end{itemize}
+The unknown terms are
+\begin{itemize}
+    \item $\Pr(x|s)$ is the \textbf{choice probability}.
+    \item $E(\epsilon(x)|s,x)$ is the expectation of $\epsilon(x)$ conditional on $s$ and $x$ being the optimal choice. Under the assumption of T1EV, we have
+          \begin{equation*}
+              E(\epsilon(x)|s,x)=\gamma-\ln(\Pr(x|s))
+          \end{equation*}
+    \item $\bar{V}(s)$ is the \textbf{expected value function}.
+\end{itemize}
+In our binary choice case (with the usual assumption on $\epsilon$), we have
+\begin{equation}\label{eq:exp_v_bin_ccp}
+    \begin{split}
+        \bar{V}(s) & =\sum_{x \in \{0,1\}} \Pr(x|s) \big\{ u(s,x) + \gamma-\ln(\Pr(x|s)) +\beta \sum \bar{V}(s') \Pr(s'|s,x) \big\} \\
+                   & =\gamma + \Pr(x=0|s) \{u(s,0) + \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0)\}                                      \\
+                   & \quad + \Pr(x=1|s) \{u(s,1) + \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,1)\}                                        \\
+    \end{split}
+\end{equation}
+
+The next steps are
+\begin{enumerate}
+    \item Estimate the choice probability ${\Pr}(x|s)$.
+    \item Given the known $\Pr(s'|s,x)$ and $u(s,x)$, along with the estimated
+          $\Pr(x|s)$, solve equation \ref{eq:exp_v_bin_ccp} for $\bar{V}(s)$.
+\end{enumerate}
+The results are tabulated against the $\bar{V}(s)$ estimated in question 2 in table \ref{tab:V_ss_ccp}.
+\begin{table}
     \centering
     \input{../Results/Tables/V_both.tex}
-    \label{tab:V_both}
+    \caption{Comparison of $\bar{V}(s)$ estimated by CCP method with the true value}
+    \label{tab:V_ss_ccp}
 \end{table}
-
-\pagebreak
-\newpage
-\appendix
-\section{Transition Probability Matrix}
-The number in parentheses is the estimated transition probability.
-\begin{table}
-    \centering
-    \input{../Results/Tables/M_0_both.tex}
-    \caption{Transition Probability Matrix $M_0$}
-    \label{tab:M_0}
-\end{table}
-\begin{table}
-    \centering
-    \input{../Results/Tables/M_1_both.tex}
-    \caption{Transition Probability Matrix $M_1$}
-    \label{tab:M_1}
-\end{table}
-\section{Conditional Choice Probability}
-
+The reason that second estimate is different/imprecise is lies in the fact that the choice probability $\Pr(x|s)$ is not precisely estimated. I have (naively) applied the frequency estimator. It may be improved by applying some other non-parametric estimator (along with some smoothing). There are no other sources of differences because all the $u(s,x)$ and transition probabilities are taken from the true model.
 \end{document}
