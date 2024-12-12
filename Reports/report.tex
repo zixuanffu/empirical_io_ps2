@@ -14,7 +14,9 @@
 \usepackage{natbib} % for bibliography
 \input newcommand.tex
 \bibliographystyle{apalike}
-\setlength{\parindent}{0pt} % remove the automatic indentation
+\setlength{\parindent}{0pt} % remove the automatic indentation % for problem set
+\renewcommand{\thesection}{Question \arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{section}}
 
 % Settings for page number in the footer
 \pagestyle{fancy}
@@ -27,7 +29,7 @@
 \vspace{.3cm}
 \large Problem Set 2 \\
 Empirical Industrial Organization}
-\author{Zixuan, Anoosheh, Shuo}
+\author{Zixuan}
 \date{\today}
 
 \begin{document}
@@ -35,7 +37,7 @@ Empirical Industrial Organization}
 
 \setcounter{page}{1}
 
-The value function is given by
+\paragraph{Value function} The value function is given by
 \begin{equation*}
     \begin{split}
         V(i,c,p,\epsilon_t) & = \max_{x \in \{0,1\}} \left\{ u(i,c,p,x) + \epsilon(x)+ \beta \E[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \right\}     \\
@@ -43,11 +45,11 @@ The value function is given by
                             & \quad + \beta \sum_{i',c',p'}\E_{\epsilon_{t+1}}[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \Pr(i', c',p'|i,c,p,x) \big\}
     \end{split}
 \end{equation*}
-The utility function $u(i,c,p,x)$ is given by
+\paragraph{Utility} The utility function $u(i,c,p,x)$ is given by
 \begin{equation*}
     u(i,c,p,x) = -\lambda \1(c>0)\1(i=0) + \alpha c -xp
 \end{equation*}
-In terms of the variables (data that we have),
+\paragraph{Variables} In terms of the variables (data that we have),
 \begin{itemize}
     \item $i$ is the inventory level.
     \item $c$ is the consumer's purchase decision (firm's sales).
@@ -55,14 +57,15 @@ In terms of the variables (data that we have),
     \item $x$ is the firm's purchase decision.
     \item $\epsilon(x)$ is choice specific random utility shock
 \end{itemize}
-In terms of the parameters (to be estimated, but actually given in this problem),
+\paragraph{Parameters} In terms of the parameters (to be estimated, but actually given in this
+problem),
 \begin{itemize}
     \item $\lambda=3$ is the penalty of stocking out (the consumer wants to buy, but the firm does not have the product).
     \item $\alpha=2$ is the marginal utility of selling the product.
     \item $\beta=0.99$ is the discount factor.
 \end{itemize}
 
-The variables follow a certain process. Here, we assume that the variables
+\paragraph{State transition} The variables follow a certain process. Here, we assume that the variables
 follow discrete Markov process. The variables in the next period:
 \begin{itemize}
     \item Inventory $i$ will be the current level + firm's purchase - sales: \begin{equation*}
@@ -82,7 +85,7 @@ follow discrete Markov process. The variables in the next period:
           \end{equation*}
 \end{itemize}
 
-\section{Question 1: Transition Probability}
+\section{Transition Probability}
 Since we have discrete state variables $(i,c,p)$, the transition probability
 can be expressed in matrix form. Moreover, the transition of $c$ and $p$ are
 independent of each other, $i$ and $x$. We only specify the transition of $i$
@@ -107,7 +110,7 @@ When $x = 1$,
     \end{pmatrix}
 \end{equation}
 Then the transition probability matrix for state $s$ is given by the Kronecker product of the transition matrices of $i$, $c$, and $p$, which is $P_s(x) = P_i(x) \otimes P_c \otimes P_p$.
-\section{Question 2: Expected Value Function}
+\section{Expected Value Function}
 \subsection{Expected/Intermediate Value Function $\bar{V}(i,c,p)$}
 We denote $\bar{V}(s) = \E_{\epsilon}[V(s,\epsilon)]$ as the expected value function (I used to call it intermediate value function).
 \begin{equation}\label{eq:exp_v}
@@ -122,11 +125,11 @@ Since $\epsilon$ is assumed to follow Type 1 Extreme Value distribution (which a
 \end{equation}
 
 \subsection{Numerical solution of $\bar{V}(i,c,p)$}
-We use the equation \ref{eq:exp_v_bin} to solve for $\bar{V}(i,c,p)$.  I rewrite the equations for all $s$ in matrix form. Since we have a total of $20=5\times 2\times 2$ discrete state $s$, denote
+We use the equation \ref{eq:exp_v_bin} to solve for $\bar{V}(i,c,p)$.  I rewrite the equations for all $(i,c,p)$ in matrix form. Since we have a total of $20=5\times 2\times 2$ discrete state $s$, denote
 \begin{itemize}
     \item $\bar{V}$ as a vector of length 20.
-    \item $u_0$ as a vector of length 20 where the $i$-th element is $u(s,0)$.
-    \item $M_0$ as a matrix of size $20 \times 20$ where the $i$-th row is the vector of $\Pr(s'|s,0)$
+    \item $u_0$ as a vector of length 20 where the $i$-th element is $u(s,0)$. Similarly for $u_1$.
+    \item $M_0$ as a matrix of size $20 \times 20$ where the $i$-th row is the vector of $\Pr(s'|s,0)$. Similarly for $M_1$.
 \end{itemize}
 Then we have
 \begin{equation}\label{eq:exp_v_bin_matrix}
@@ -141,7 +144,8 @@ The goal is to numerically solve for equation \ref{eq:exp_v_bin_matrix} for $\ba
     \label{tab:V_ss}
 \end{table}
 \newpage
-\section{Question 3: Simulation}
+\section{Simulation}
+The simulation follows the following steps.
 \begin{enumerate}
     \item At period $t=0$, simulate state $s$ as well as the shock $\epsilon \sim
               \text{EV}(1)$.
@@ -152,23 +156,25 @@ The goal is to numerically solve for equation \ref{eq:exp_v_bin_matrix} for $\ba
               \sum_{s'}\bar{V}(s')\Pr(s'|s,x) \right\}
           \end{equation*}
     \item Given $x^*$, simulate a new state $s'$ from the transition matrix $M_{x^*}$.
-    \item Repeat step 2 and 3 for $T$ periods.
+    \item Repeat step 2 and 3 for $T=10000$ periods.
 \end{enumerate}
-The  summary statistics are shown in the table \ref{tab:sim_des}.
+The summary statistics of simulation are shown in the table \ref{tab:sim_des}, which includes
 \begin{enumerate}
     \item frequency of positive purchases,
     \item probability of purchasing on sale,
     \item average duration between sales,
     \item average duration between purchases
-\end{enumerate}
-\begin{table}
+\end{enumerate}\begin{table}
     \centering
     \input{../Results/Tables/simulation_des.tex}
     \caption{Summary statistics of the simulation}
     \label{tab:sim_des}
 \end{table}
 
-\section{Question 4: Estimate $\bar{V}(i,c,p)$ using CCP method}
+It would be interesting to compute the \textbf{true statistics} from the given
+parameters and compare them with the \textbf{simulated ones}.
+
+\section{Estimate $\bar{V}(i,c,p)$ using CCP method}
 In this question, we \textbf{rewrite} equation \ref{eq:exp_v} in terms of the choice probability $\Pr(x|s)$.
 \begin{equation}
     \begin{split}
@@ -206,11 +212,12 @@ The next steps are
           $\Pr(x|s)$, solve equation \ref{eq:exp_v_bin_ccp} for $\bar{V}(s)$.
 \end{enumerate}
 The results are tabulated against the $\bar{V}(s)$ estimated in question 2 in table \ref{tab:V_ss_ccp}.
+\newpage
 \begin{table}
     \centering
     \input{../Results/Tables/V_both.tex}
     \caption{Comparison of $\bar{V}(s)$ estimated by CCP method with the true value}
     \label{tab:V_ss_ccp}
 \end{table}
-The reason that second estimate is different/imprecise is lies in the fact that the choice probability $\Pr(x|s)$ is not precisely estimated. I have (naively) applied the frequency estimator. It may be improved by applying some other non-parametric estimator (along with some smoothing). There are no other sources of differences because all the $u(s,x)$ and transition probabilities are taken from the true model.
+The reason that second estimate is different/imprecise lies in the fact that the choice probability $\Pr(x|s)$ is not precisely estimated. I have (naively) applied the frequency estimator. It may be improved by applying some other non-parametric estimator (along with some smoothing). There are no other sources of differences because all the $u(s,x)$ and transition probabilities are taken from the true model.
 \end{document}
