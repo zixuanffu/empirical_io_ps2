@@ -37,7 +37,8 @@ Empirical Industrial Organization}
 
 \setcounter{page}{1}
 
-\paragraph{Value function} The value function is given by
+\paragraph{Value function} Consider the following dynamic model of (consumer's) inventory control. The
+value function is given by
 \begin{equation*}
     \begin{split}
         V(i,c,p,\epsilon_t) & = \max_{x \in \{0,1\}} \left\{ u(i,c,p,x) + \epsilon(x)+ \beta \E[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \right\}     \\
@@ -45,39 +46,40 @@ Empirical Industrial Organization}
                             & \quad + \beta \sum_{i',c',p'}\E_{\epsilon_{t+1}}[V(i',c',p',\epsilon_{t+1})|i,c,p,x] \Pr(i', c',p'|i,c,p,x) \big\}
     \end{split}
 \end{equation*}
-\paragraph{Utility} The utility function $u(i,c,p,x)$ is given by
+\paragraph{Utility} The consumer's utility function $u(i,c,p,x)$ is given by
 \begin{equation*}
     u(i,c,p,x) = -\lambda \1(c>0)\1(i=0) + \alpha c -xp
 \end{equation*}
 \paragraph{Variables} In terms of the variables (data that we have),
 \begin{itemize}
     \item $i$ is the inventory level.
-    \item $c$ is the consumer's purchase decision (firm's sales).
+    \item $c$ is the consumption (not a choice variable, but a state variable).
     \item $p$ is the price.
-    \item $x$ is the firm's purchase decision.
+    \item $x$ is the consumer's purchase decision.
     \item $\epsilon(x)$ is choice specific random utility shock
 \end{itemize}
 \paragraph{Parameters} In terms of the parameters (to be estimated, but actually given in this
 problem),
 \begin{itemize}
-    \item $\lambda=3$ is the penalty of stocking out (the consumer wants to buy, but the firm does not have the product).
-    \item $\alpha=2$ is the marginal utility of selling the product.
+    \item $\lambda=3$ is the penalty of stocking out (I want to consume but unfortunately I have nothing left).
+    \item $\alpha=2$ is the marginal utility of consuming the good.
     \item $\beta=0.99$ is the discount factor.
 \end{itemize}
 
 \paragraph{State transition} The variables follow a certain process. Here, we assume that the variables
 follow discrete Markov process. The variables in the next period:
 \begin{itemize}
-    \item Inventory $i$ will be the current level + firm's purchase - sales: \begin{equation*}
+    \item Inventory $i'$ will be the current level + consumer's purchase $x$ -
+          consumption $c$: \begin{equation*}
               i'=\min \set{\bar{i}=4,i+x-c}
           \end{equation*}
-    \item Consumer's purchase decision $c$ (firm's sales):\begin{equation*}
+    \item Consumer's purchase decision $c'$ (firm's sales):\begin{equation*}
               c'=\begin{cases}
                   0 & \text{with probability } \gamma = 0.5   \\
                   1 & \text{with probability } 1-\gamma = 0.5
               \end{cases}
           \end{equation*}
-    \item Price $p$ with two discrete states $p_s=0.5$ and $p_r=2$: \begin{equation*}
+    \item Price $p'$ with two discrete states $p_s=0.5$ and $p_r=2$: \begin{equation*}
               \Pi=\begin{pmatrix}
                   0.75 & 0.25 \\
                   0.95 & 0.05
@@ -145,7 +147,7 @@ The goal is to numerically solve for equation \ref{eq:exp_v_bin_matrix} for $\ba
 \end{table}
 \newpage
 \section{Simulation}
-The simulation follows the following steps.
+\subsection{Simulation results} The simulation follows the following steps.
 \begin{enumerate}
     \item At period $t=0$, simulate state $s$ as well as the shock $\epsilon \sim
               \text{EV}(1)$.
@@ -158,21 +160,50 @@ The simulation follows the following steps.
     \item Given $x^*$, simulate a new state $s'$ from the transition matrix $M_{x^*}$.
     \item Repeat step 2 and 3 for $T=10000$ periods.
 \end{enumerate}
-The summary statistics of simulation are shown in the table \ref{tab:sim_des}, which includes
-\begin{enumerate}
-    \item frequency of positive purchases,
-    \item probability of purchasing on sale,
-    \item average duration between sales,
-    \item average duration between purchases
-\end{enumerate}\begin{table}
+\subsection{Summary statistics}
+The summary statistics of simulation are shown in the table \ref{tab:sim_des}.
+\begin{table}[h]
     \centering
-    \input{../Results/Tables/simulation_des.tex}
-    \caption{Summary statistics of the simulation}
-    \label{tab:sim_des}
+    \begin{minipage}{0.45\textwidth}
+        \fontsize{8pt}{10pt}\selectfont
+        \centering
+        \input{../Results/Tables/simulation_des.tex}
+        \captionof{table}{Simulation}
+        \label{tab:sim_des}
+    \end{minipage}%
+    \hspace{0.05\textwidth} % Space between the two tables
+    \begin{minipage}{0.45\textwidth}\fontsize{8pt}{10pt}\selectfont
+        \centering
+        \input{../Results/Tables/theoretical_des.tex}
+        \captionof{table}{Theoretical steady state}
+        \label{tab:theo_des}
+    \end{minipage}
 \end{table}
-
-It would be interesting to compute the \textbf{true statistics} from the given
-parameters and compare them with the \textbf{simulated ones}.
+Moreover, it would be interesting to compute each \textbf{summary statistics}
+from the given parameters. To be specific,
+\begin{enumerate}
+    \item Frequency of positive purchases: $\E(x)=\sum_s\Pr(x=1|s=s)\Pr(s=s)$.
+    \item Probability of purchasing on sale: $\Pr(x=1|p=0.5)=\sum_{s\in (i,c,p=0.5)}
+              \Pr(x=1|s=s)\Pr(s=s)$
+    \item Average duration between sales: $\frac{1}{\Pr(p=0.5)}$
+    \item Average duration between purchases: $\frac{1}{\E(x)}$
+\end{enumerate}
+The above statistics are straightforward once we have the following.
+\begin{itemize}
+    \item \textbf{Conditional choice probability vector} $\Pr(x=1|s)$ of length 20 (the number of states),
+          which can be directly computed by
+          \begin{equation*}
+              \Pr(x=1|s)=\frac{\exp\left\{ u(s,x=1) + \beta \sum_{s'}\bar{V}(s') \Pr(s'|s,x)\right\}}{\sum_{x \in \{0,1\}} \exp\left\{ u(s,x) + \beta \sum_{s'}\bar{V}(s') \Pr(s'|s,x)\right\}}
+          \end{equation*}
+    \item \textbf{Stationary distribution vector} $p$ which is found by solving $\Pi' p = p$, where
+          \begin{equation*}
+              \begin{split}
+                  \Pi = & \underbrace{M_1}_{\text{trans prob when x=1}} \underbrace{\circ}_{\text{element-wise product}} (\underbrace{\Pr(x=1|s) \ldots \Pr(x=1|s)}_{\text{repeat 20 times}}) \\
+                        & + M_0 \circ (\Pr(x=0|s),\ldots,\Pr(x=0|s))
+              \end{split}
+          \end{equation*}
+\end{itemize}
+The results are shown in table \ref{tab:theo_des}. The simulation results are quite close to the theoretical steady state values. It seems that with 10000 periods, the simulation has (almost) converged to the steady state.
 
 \section{Estimate $\bar{V}(i,c,p)$ using CCP method}
 In this question, we \textbf{rewrite} equation \ref{eq:exp_v} in terms of the choice probability $\Pr(x|s)$.
