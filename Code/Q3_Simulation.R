@@ -7,7 +7,7 @@ num_state <- nrow(s)
 # simulate state transition
 # we pick initial state as (0,0,0.5)
 n <- 10000
-idx <- 17
+idx <- 2
 s_init <- s[idx, ]
 epsilon_0 <- rgumbel(n)
 epsilon_1 <- rgumbel(n)
@@ -60,7 +60,7 @@ dim(unique(s_list)) # check the number of unique states that we managed to visit
 setDT(s)
 s[, id := 1:.N] # add id to the state space
 s_unique <- merge(unique(s_list), s, by = c("i", "c", "p"))
-setdiff(s$id, s_unique$id) # check the id of the states that we did not visit:  61 62 65 66 67 68
+setdiff(s$id, s_unique$id) # check the id of the states that we did not visit:  62 65 66 67 68
 
 saveRDS(s_list, "Data/Q3_s_list.RDS")
 saveRDS(x_list, "Data/Q3_x_list.RDS")

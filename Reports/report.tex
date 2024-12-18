@@ -91,7 +91,9 @@ follow discrete Markov process. The variables in the next period:
 Since we have discrete state variables $(i,c,p)$, the transition probability
 can be expressed in matrix form. Moreover, the transition of $c$ and $p$ are
 independent of each other, $i$ and $x$. We only specify the transition of $i$
-here which takes values from 0 to 4,with step size 0.25. \textbf{The matrix dimension is $17 \times 17$.} \\ When $x = 0$,the first 5 rows takes the following form:
+here which takes values from 0 to 4,with step size 0.25. \textbf{The matrix
+    dimension is $17 \times 17$.} \\ When $x = 0$,the first 5 rows takes the
+following form:
 \begin{equation}\label{eq:trans0}
     \begin{pmatrix}
         1   & 0   & 0   & 0   & 0   \\
@@ -139,7 +141,7 @@ Then we have
 \end{equation}
 The goal is to numerically solve for equation \ref{eq:exp_v_bin_matrix} for $\bar{V}$. The result is shown in table \ref{tab:V_ss}.
 \newpage
-\begin{table}
+\begin{table} \fontsize{6pt}{8pt}\selectfont
     \centering
     \input{../Results/Tables/V_state.tex}
     \caption{Expected value function $\bar{V}(i,c,p)$ for each state $s=(i,c,p)$}
@@ -231,24 +233,36 @@ In our binary choice case (with the usual assumption on $\epsilon$), we have
 \begin{equation}\label{eq:exp_v_bin_ccp}
     \begin{split}
         \bar{V}(s) & =\sum_{x \in \{0,1\}} \Pr(x|s) \big\{ u(s,x) + \gamma-\ln(\Pr(x|s)) +\beta \sum \bar{V}(s') \Pr(s'|s,x) \big\} \\
-                   & =\gamma + \Pr(x=0|s) \{u(s,0) + \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0)\}                                      \\
-                   & \quad + \Pr(x=1|s) \{u(s,1) + \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,1)\}                                        \\
+                   & =\gamma + \Pr(x=0|s) \{-\log(\Pr(x=0|s))+u(s,0) + \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,0)\}                    \\
+                   & \quad + \Pr(x=1|s) \{-\log(\Pr(x=1|s))+u(s,1) + \beta \sum_{s'} \bar{V}(s') \Pr(s'|s,1)\}                      \\
     \end{split}
 \end{equation}
 
 The next steps are
 \begin{enumerate}
     \item Estimate the choice probability ${\Pr}(x|s)$.
+          \begin{enumerate}
+              \item Frequency estimator: Though the estimator is consistent, in simulation not all
+                    states are visited while some are visited only a few times without any purchase
+                    $x=1$ observed.
+              \item Kernel smoothing: It is useful when confronting the problem faced with
+                    frequency estimator. I pick \textbf{kernel type (Gaussian kernel), bandwidth
+                        (0.5), distance function (Sum of Euclidean distance)} to perform kernel
+                    smoothing.
+                    \begin{equation*}
+                        \hat{\Pr}(x=1|s)=\frac{\sum_j K(d(s,s_j))x_j}{\sum_j K(d(s,s_j))}
+                    \end{equation*}
+                    where $K_{\text{Gaussian}}=\exp\left\{-\frac{d^2}{2h^2}\right\}$.
+          \end{enumerate}
     \item Given the known $\Pr(s'|s,x)$ and $u(s,x)$, along with the estimated
           $\Pr(x|s)$, solve equation \ref{eq:exp_v_bin_ccp} for $\bar{V}(s)$.
 \end{enumerate}
 The results are tabulated against the $\bar{V}(s)$ estimated in question 2 in table \ref{tab:V_ss_ccp}.
-\newpage
-\begin{table}
+\begin{table}\fontsize{6pt}{8pt}\selectfont
     \centering
     \input{../Results/Tables/V_both.tex}
     \caption{Comparison of $\bar{V}(s)$ estimated by CCP method with the true value}
     \label{tab:V_ss_ccp}
 \end{table}
-The reason that second estimate is different/imprecise lies in the fact that the choice probability $\Pr(x|s)$ is not precisely estimated. I have (naively) applied the frequency estimator. It may be improved by applying some other non-parametric estimator (along with some smoothing). There are no other sources of differences because all the $u(s,x)$ and transition probabilities are taken from the true model.
+The reason that second estimate is different/imprecise lies in the fact that the choice probability $\Pr(x|s)$ is not well estimated. In simulation, (1) not all states are visited (62 65 66 67 68), (2) some states have extreme frequency (0: (60 61), 1: (2 46 50 54 53 56 58 57 64)). Since equation \ref{eq:exp_v_bin_ccp} involves $\log(\hat{\Pr}(x|s))$, I perform kernel smoothing to avoid extreme value $0,1$. This nonparametric approximation of the CCP may be improved byfor selecting a better bandwidth. There are no other sources of differences because all the $u(s,x)$ and transition probabilities $M_0,M_1$ are taken from the true model.
 \end{document}

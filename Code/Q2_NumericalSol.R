@@ -20,7 +20,9 @@ m_i1[length(i), length(i)] <- 1
 # overall transition matrix using Kronecker product
 M_0 <- kronecker(m_i0, kronecker(m_c, m_p))
 M_1 <- kronecker(m_i1, kronecker(m_c, m_p))
-
+# check if the sum of each row is 1
+View(rowSums(M_0))
+View(rowSums(M_1))
 # utility function
 u <- function(s, x, lambda = 3, alpha = 2) {
     i <- s[1]
