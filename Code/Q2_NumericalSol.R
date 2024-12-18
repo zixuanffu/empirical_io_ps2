@@ -1,21 +1,21 @@
 rm(list = ls())
 pacman::p_load(rootSolve, xtable)
 
+# discrete state space
+i <- seq(0, 4, 0.25)
+c <- c(0, 0.25) # 0 or 0.25
+p <- c(2, 0.5)
+s <- expand.grid(p = p, c = c, i = i)
+s <- s[, c(3, 2, 1)]
+
 # transition matrix for i, c, p separately
 m_c <- matrix(0.5, 2, 2)
 m_p <- matrix(c(0.75, 0.25, 0.95, 0.05), 2, 2, byrow = TRUE)
-m_i0 <- diag(0.5, 5)
+m_i0 <- diag(0.5, length(i))
 m_i0[row(m_i0) - col(m_i0) == 1] <- 0.5
 m_i1 <- t(m_i0)
 m_i0[1, 1] <- 1
-m_i1[5, 5] <- 1
-
-# discrete state space
-i <- 0:4
-c <- 0:1
-p <- c(0.5, 2)
-s <- expand.grid(p = p, c = c, i = i)
-s <- s[, c(3, 2, 1)]
+m_i1[length(i), length(i)] <- 1
 
 # overall transition matrix using Kronecker product
 M_0 <- kronecker(m_i0, kronecker(m_c, m_p))
@@ -45,7 +45,7 @@ exp_v <- function(V, u_0, u_1, M_0, M_1, beta = 0.99, gamma = 0.5772157) {
 }
 
 # solve for the $\bar{V}$
-V_init <- rep(1, 20)
+V_init <- rep(1, nrow(s))
 solution <- multiroot(exp_v, start = V_init, u_0 = u_0, u_1 = u_1, M_0 = M_0, M_1 = M_1)
 V_ss <- solution$root
 V_ss

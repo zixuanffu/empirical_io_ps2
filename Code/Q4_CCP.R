@@ -7,20 +7,18 @@ setDT(s)
 s[, id := 1:.N]
 
 # estimate choice probability Pr(x=1|s)
-total <- dt[, .N, by = .(i, c, p)]
-purchase <- dt[x == 1, .N, by = .(i, c, p)]
-total <- merge(total, purchase, by = c("i", "c", "p"))
-setnames(total, c("i", "c", "p", "Total", "Purchase"))
+total <- dt[, .(Total = .N, Purchase = sum(x)), by = .(i, c, p)]
 total[, Prob_x := Purchase / Total]
-total <- merge(total, s, by = c("i", "c", "p"))
-hat_ccp <- total[order(id), ]$Prob_x
+hat_ccp <- merge(s, total, all.x = TRUE) # we need ccp for all states, what should we do if some states are not visited?
+hat_ccp[order(id), ]$Prob_x
+
 
 hat_exp_v <- function(V, u_0, u_1, M_0, M_1, prob_x, beta = 0.99, gamma = 0.5772157) {
     res <- V - (gamma + (1 - prob_x) * (u_0 + beta * M_0 %*% V) + prob_x * (u_1 + beta * M_1 %*% V))
     return(res)
 }
 
-V_init <- rep(1, 20)
+V_init <- V_ss
 solution <- multiroot(hat_exp_v, start = V_init, u_0 = u_0, u_1 = u_1, M_0 = M_0, M_1 = M_1, prob_x = hat_ccp)
 hat_V_ss <- solution$root
 
