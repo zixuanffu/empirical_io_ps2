@@ -28,7 +28,7 @@ u <- function(s, x, lambda = 3, alpha = 2) {
     i <- s[1]
     c <- s[2]
     p <- s[3]
-    res <- (-lambda * (c > 0) * (i == 0) + alpha * c - x * p)
+    res <- (-lambda * (c > 0) * ((i + x) == 0) + alpha * c - x * p)
     return(as.matrix(res))
 }
 u_0 <- u(s, 0)
