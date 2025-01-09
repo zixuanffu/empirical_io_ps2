@@ -13,9 +13,11 @@ m_c <- matrix(0.5, 2, 2)
 m_p <- matrix(c(0.75, 0.25, 0.95, 0.05), 2, 2, byrow = TRUE)
 m_i0 <- diag(0.5, length(i))
 m_i0[row(m_i0) - col(m_i0) == 1] <- 0.5
-m_i1 <- t(m_i0)
 m_i0[1, 1] <- 1
-m_i1[length(i), length(i)] <- 1
+m_i1 <- matrix(0, length(i), length(i))
+m_i1[col(m_i1) - row(m_i1) == 3] <- 0.5
+m_i1[col(m_i1) - row(m_i1) == 4] <- 0.5
+m_i1[row(m_i1) >= 14 & col(m_i1) == 17] <- 1
 
 # overall transition matrix using Kronecker product
 M_0 <- kronecker(m_i0, kronecker(m_c, m_p))
