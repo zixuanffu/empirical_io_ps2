@@ -139,11 +139,11 @@ Since $\epsilon$ is assumed to follow Type 1 Extreme Value distribution (which a
 \end{equation}
 
 \subsection{Numerical solution of $\bar{V}(i,c,p)$}
-We use the equation \ref{eq:exp_v_bin} to solve for $\bar{V}(i,c,p)$.  I rewrite the equations for all $(i,c,p)$ in matrix form. Since we have a total of $20=5\times 2\times 2$ discrete state $s$, denote
+We use the equation \ref{eq:exp_v_bin} to solve for $\bar{V}(i,c,p)$.  I rewrite the equations for all $(i,c,p)$ in matrix form. Since we have a total of $68=17\times 2\times 2$ discrete state $s$, denote
 \begin{itemize}
-    \item $\bar{V}$ as a vector of length 20.
-    \item $u_0$ as a vector of length 20 where the $i$-th element is $u(s,0)$. Similarly for $u_1$.
-    \item $M_0$ as a matrix of size $20 \times 20$ where the $i$-th row is the vector of $\Pr(s'|s,0)$. Similarly for $M_1$.
+    \item $\bar{V}$ as a vector of length 68.
+    \item $u_0$ as a vector of length 68 where the $i$-th element is $u(s,0)$. Similarly for $u_1$.
+    \item $M_0$ as a matrix of size $68 \times 68$ where the $i$-th row is the vector of $\Pr(s'|s,0)$. Similarly for $M_1$.
 \end{itemize}
 Then we have
 \begin{equation}\label{eq:exp_v_bin_matrix}
@@ -202,7 +202,7 @@ from the given parameters. To be specific,
 \end{enumerate}
 The above statistics are straightforward once we have the following.
 \begin{itemize}
-    \item \textbf{Conditional choice probability vector} $\Pr(x=1|s)$ of length 20 (the number of states),
+    \item \textbf{Conditional choice probability vector} $\Pr(x=1|s)$ of length 68 (the number of states),
           which can be directly computed by
           \begin{equation*}
               \Pr(x=1|s)=\frac{\exp\left\{ u(s,x=1) + \beta \sum_{s'}\bar{V}(s') \Pr(s'|s,x)\right\}}{\sum_{x \in \{0,1\}} \exp\left\{ u(s,x) + \beta \sum_{s'}\bar{V}(s') \Pr(s'|s,x)\right\}}
@@ -210,7 +210,7 @@ The above statistics are straightforward once we have the following.
     \item \textbf{Stationary distribution vector} $p$ which is found by solving $\Pi' p = p$, where
           \begin{equation*}
               \begin{split}
-                  \Pi = & \underbrace{M_1}_{\text{trans prob when x=1}} \underbrace{\circ}_{\text{element-wise product}} (\underbrace{\Pr(x=1|s) \ldots \Pr(x=1|s)}_{\text{repeat 20 times}}) \\
+                  \Pi = & \underbrace{M_1}_{\text{trans prob when x=1}} \underbrace{\circ}_{\text{element-wise product}} (\underbrace{\Pr(x=1|s) \ldots \Pr(x=1|s)}_{\text{repeat 68 times}}) \\
                         & + M_0 \circ (\Pr(x=0|s),\ldots,\Pr(x=0|s))
               \end{split}
           \end{equation*}
